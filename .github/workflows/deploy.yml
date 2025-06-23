@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: 🛠 Build project
         run: npm run build
@@ -29,4 +29,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          cname: ''
