@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
 import { useStore } from '@/store'
 
-const AddSection = () => {
+const AddTask = () => {
 	const handleTaskAction = useStore((state) => state.handleTaskAction)
 	const [text, setText] = useState('')
 
@@ -34,4 +34,4 @@ const AddSection = () => {
 	)
 }
 
-export default AddSection
+export default AddTask

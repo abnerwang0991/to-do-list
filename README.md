@@ -1,54 +1,66 @@
-# React + TypeScript + Vite
+# To Do List
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 需求釐清
 
-Currently, two official plugins are available:
+1. 新增代辦事項
+2. 將代辦事項變更為未完成/已完成
+3. 刪除代辦事項
+4. 編輯代辦事項
+5. 上一步：返回至上一個操作步驟
+6. 下一步：更新至下一個操作步驟
+7. 更新歷史紀錄：若在中間步驟執行 1~4 動作，則取代歷史紀錄該步驟後面的步驟，重新記錄
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 架構
 
-## Expanding the ESLint configuration
+- UI
+  - ToDoList(index): Container
+  - AddTask: 新增代辦事項
+  - TaskList: 顯示代辦事項列表
+  - TaskListItem: 顯示個別代辦事項
+  - UndoRedoControl: 控制上一步/下一步
+- 狀態管理（Zustand）：
+  - 使用 `Zustand` 建立中心化的 `useStore` store
+  - 將所有代辦事項狀態與邏輯集中管理，包含：
+    - 代辦事項列表
+    - 新增 / 移除 / 切換狀態
+    - Undo / Redo 機制
+  - UI 元件透過 hook 訂閱所需狀態與操作函數，實現單向資料流
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 資料模組
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+| 狀態           | 來源         | 歸屬            | 描述                 |
+| -------------- | ------------ | --------------- | -------------------- |
+| tasks          | store        | TaskList        | 代辦事項列表         |
+| historyPointer | store        | UndoRedoControl | 當前對應歷史紀錄指針 |
+| history        | store        | UndoRedoControl | 歷史紀錄             |
+| text           | AddTask      | AddTask         | 代辦事項文字         |
+| isEditing      | TaskListItem | TaskListItem    | 是否為編輯狀態       |
+| text           | TaskListItem | TaskListItem    | 編輯代辦事項文字     |
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 介面設計
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Prop  | 來源     | 歸屬         | 描述             |
+| ----- | -------- | ------------ | ---------------- |
+| task  | TaskList | TaskListItem | 個別代辦事項     |
+| index | TaskList | TaskListItem | 個別代辦事項索引 |
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+| Action            | 來源         | 歸屬                   | 描述                  |
+| ----------------- | ------------ | ---------------------- | --------------------- |
+| addTask           | store        | store                  | 新增代辦事項          |
+| changeTask        | store        | store                  | 變更代辦事項文字/狀態 |
+| deleteTask        | store        | store                  | 刪除代辦事項          |
+| handleTaskAction  | store        | AddTask / TaskListItem | 處理代辦事項相關動作  |
+| setHistoryPointer | store        | store                  | 設定歷史紀錄指針      |
+| addHistoryStep    | store        | store                  | 新增歷史紀錄          |
+| sliceHistory      | store        | store                  | 擷取歷史紀錄          |
+| redo              | store        | UndoRedoControl        | 上一步                |
+| undo              | store        | UndoRedoControl        | 下一步                |
+| onSubmit          | AddTask      | AddTask                | 新增代辦事項          |
+| onChangeStatus    | TaskListItem | TaskListItem           | 變更代辦事項狀態      |
+| onSubmit          | TaskListItem | TaskListItem           | 變更代辦事項文字      |
+
+## 優化
+
+- 使用者體驗優化
+  - Input autofocus
+  - Input keydown enter
